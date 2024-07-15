@@ -21,6 +21,10 @@ SECTION .data
 
     msg9 db 'Ingresa una opcion: $', 0
 
+    msg11 db '1. Regresar al menu principal$', 0
+
+    msg12 db '3. Salir del programa$', 0
+
     msgFin db 'Fin del programa$', 0
 
 SECTION .text
@@ -31,6 +35,64 @@ MAIN:
     CALL MostrarMenu
     CALL EsperarTecla
     INT 20H
+
+MostrarMenu2:
+
+    CALL IniciarModoTexto
+
+    MOV BH, 0 
+
+    CALL ImprimirOpciones2
+
+    CALL EsperarTecla
+
+    CMP AL, '1'
+    JE MostrarMenu
+
+    CMP AL, '3'
+    JE FIN
+
+
+    JMP MostrarMenu2
+
+    RET
+
+
+ImprimirOpciones2:
+
+    ; Primer mensaje
+    MOV CH, 2 ;fila 10
+    MOV CL, 20 ;columna 20
+
+    ; Mover el cursor
+    CALL MoverCursor
+
+    ; Primer mensaje
+    MOV AH, 09h
+    MOV DX, msg11
+    INT 21h
+
+    ; Mover el cursor
+    MOV CH, 6 ; Posicion de la opcion 1 fila 20
+    CALL MoverCursor
+
+    ; Primera opcion
+
+    MOV AH, 09h
+    MOV DX, msg12
+    INT 21h
+ 
+    ;Pedir opcion
+    MOV CH, 22
+    CALL MoverCursor
+
+    ;Mensaje de pedir opcion
+    MOV AH, 09h
+    MOV DX, msg9
+    INT 21h
+
+
+    RET
 
 
 MostrarMenu:
@@ -44,7 +106,7 @@ MostrarMenu:
     CALL EsperarTecla
 
     CMP AL, '1' ; Mostrar el triangulo
-    ;JE TrianguloRectangulo
+    JE Triangulo
 
     ;CMP AL, '2' ; Mostrar el cuadrado
     ;JE DibujarCuadradoMenu
@@ -183,3 +245,57 @@ EsperarTecla:
 
 
 
+Triangulo:
+    CALL IniciarModoGrafico
+    CALL CambiarPagina
+
+    ; Posiciones iniciales
+
+    MOV SI, 90d
+
+    MOV DX, 70d ;En la fila 70 (46 hexa)
+    MOV CX, 90d ;En la columna 90 (8c hexa)
+
+    CALL ConstruirTriangulo
+
+ConstruirTriangulo:
+
+    MOV AH, 0CH  ;Peticion para escribir un punto
+    MOV AL, 12H 
+    MOV BH, 1 
+
+    INT 10H
+
+    CMP CX, SI
+    JE Comparar
+
+    INC CX
+    JMP ConstruirTriangulo
+
+Comparar:
+    CMP DX, 240d
+    JE FinConstruir
+
+    MOV CX, 90d 
+
+    INC SI
+    INC DX
+
+    JMP ConstruirTriangulo
+
+FinConstruir:
+
+
+
+    CALL EsperarTecla
+
+    ;Imprimir mensaje 
+    ;MOV AH, 09h
+    ;MOV DX, msg8
+    ;INT 21h
+
+    CMP AL, 'S' ; Salir
+    JE MostrarMenu2
+
+    CMP AL, 's' ; Salir
+    JE MostrarMenu2
